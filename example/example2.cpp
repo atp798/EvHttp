@@ -4,14 +4,10 @@
  * MIT License
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
 #include "EvHttpServ.h"
 #include "Utilis/Defer.h"
 #include "Utilis/Logger.h"
-#include "Utilis/Initialize.h"
 
 #ifdef WIN32
 #include <winsock2.h>
