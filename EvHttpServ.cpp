@@ -66,7 +66,7 @@ void evLogCB(int severity, const char* msg) throw(std::runtime_error){
 EvHttpServ::EvHttpServ(std::string const &strAddr, std::uint16_t nPort) throw (EvHttpServRTEXCP){
     if(strAddr != ""){
         unsigned long uAddr = inet_addr(strAddr.c_str());
-        if(uAddr == INADDR_NONE ){
+        if( INADDR_NONE == uAddr ){
             Utilis::LogFatal("Server address illegal, inet_addr convertion failed!\n");
             throw EvHttpServRTEXCP("Server address illegal，inet_addr convertion failed!");
         }

@@ -3,6 +3,7 @@ cmake-build-debug
 
 test
 Utilis/cJSON.*
+Utilis/Initialize.h
 
 EvHttpBase.*
 EvHttpClient.*

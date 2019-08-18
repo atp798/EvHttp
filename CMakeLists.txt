@@ -23,28 +23,35 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall")
 
 set(EVENT_INCLUDE "/usr/local/include/")
 set(EVENT_LIB_DIR "/usr/local/lib/")
+set(EVENT_LIB_FILES Utilis/Defer.h
+                    Utilis/Exceptions.h
+                    Utilis/Logger.cpp
+                    Utilis/Logger.h
+                    Utilis/NonCopyable.h
+                    EvHttpResp.cpp
+                    EvHttpResp.h
+                    EvHttpServ.cpp
+                    EvHttpServ.h
+        )
+
 include_directories(.)
 include_directories(Utilis)
 include_directories(${EVENT_INCLUDE})
 
 link_directories(${EVENT_LIB_DIR})
 
-add_executable(EvHttp
-        main.cpp
-        Utilis/Defer.h
-        Utilis/Exceptions.h
-        Utilis/Logger.cpp
-        Utilis/Logger.h
-        Utilis/NonCopyable.h
-        EvHttpResp.cpp
-        EvHttpResp.h
-        EvHttpServ.cpp
-        EvHttpServ.h
+add_executable(EvHttpExample1
+        example/example1.cpp
+        ${EVENT_LIB_FILES}
+        example/example1.cpp)
+target_link_libraries(EvHttpExample1 -levent)
+
+add_executable(EvHttpExample2
+        example/example2.cpp
+        ${EVENT_LIB_FILES}
         #EvHttpClient.cpp EvHttpClient.h Utilis/Initialize.h EvHttpBase.h EvHttpBase.cpp EvHttpConn.cpp EvHttpConn.h EvHttpReq.cpp EvHttpReq.h
         )
-
-target_link_libraries(EvHttp -levent)
-
+target_link_libraries(EvHttpExample2 -levent)
 
 include_directories(${GTEST_INCLUDE_DIRS})
 
