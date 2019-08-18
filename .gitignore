@@ -1,0 +1,6 @@
+cmake-build-debug
+Utilis/cJSON.*
+EvHttpBase.*
+EvHttpClient.*
+EvHttpConn.*
+EvHttpReq.*
