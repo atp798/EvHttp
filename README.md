@@ -47,12 +47,23 @@ More examples can be found in folder "example".
 
 It is recommended to use g++ 4.9+ to support c++11 features better.
 
-TODO
-----
-- Reorganize project, add libevent as third_party dependancy.
-- Refine code.
+Usage
+-----
+1. Download: `git clone --recursive https://github.com/atp798/EvHttp.git`
+
+2. Build: `mkdir build && cd build && cmake ../ && make`
+
+3. Run sample: `./EvHttpExample1`
+
+4. Test the http server: `curl -X GET x.x.x.x:8077/hi/testget`. The ip address 'x.x.x.x' should be replaced by the server ip address.
+
+TODO list
+---------
 - Make it thread-safe.
-- Add client support.
+- Add http client feature.
+- Add tcp server & client.
+- Support https.
+- Support udp.
 
 License
 -------
