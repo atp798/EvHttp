@@ -1,67 +1,53 @@
-cmake_minimum_required(VERSION 2.8)
-project(EvHttp)
+cmake_minimum_required(VERSION 3.1)
 
-find_package(GTest REQUIRED)
+project(EvHttp CXX C)
+
+# Build with -std=c++11
+set(CMAKE_CXX_STANDARD  11)
+
 find_package(Threads REQUIRED)
-
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else()
-    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-endif()
-
-#set(CMAKE_CXX_STANDARD 14) #This is only supported by cmake >3.1
-#add_compile_options(-std=c++11)  #Use this together with above line
-
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall")
 
-set(EVENT_INCLUDE "/usr/local/include/")
-set(EVENT_LIB_DIR "/usr/local/lib/")
-set(EVENT_LIB_FILES Utilis/Defer.h
-                    Utilis/Exceptions.h
-                    Utilis/Logger.cpp
-                    Utilis/Logger.h
-                    Utilis/NonCopyable.h
-                    EvHttpResp.cpp
-                    EvHttpResp.h
-                    EvHttpServ.cpp
-                    EvHttpServ.h
-        )
+set(THIRD_PARTY_PATH "${PROJECT_SOURCE_DIR}/third_party" CACHE STRING
+    "A path setting third party libraries download directories.")
 
-include_directories(.)
-include_directories(Utilis)
-include_directories(${EVENT_INCLUDE})
+# ----- Build libevent -----
+set(EVENT__DISABLE_BENCHMARK ON CACHE BOOL
+    "Defines if Libevent should build without the benchmark executables, default: OFF")
+set(EVENT__DISABLE_DEBUG_MODE ON CACHE BOOL
+    "Define if Libevent should build without support for a debug mode, default: OFF")
+set(EVENT__DISABLE_MM_REPLACEMENT OFF CACHE BOOL
+    "Define if Libevent should not allow replacing the mm functions, default: OFF")
+set(EVENT__DISABLE_OPENSSL OFF CACHE BOOL
+    "Define if Libevent should build without support for OpenSSL encryption, default: OFF")
+set(EVENT__DISABLE_REGRESS ON CACHE BOOL
+    "Disable the regress tests, default: OFF")
+set(EVENT__DISABLE_SAMPLES ON CACHE BOOL
+    "Disable sample files, default: OFF")
+set(EVENT__DISABLE_TESTS ON CACHE BOOL
+    "If tests should be compiled or not, default: OFF")
+set(EVENT__DISABLE_THREAD_SUPPORT OFF CACHE BOOL
+    "Define if Libevent should not be compiled with thread support, default: OFF")
+set(EVENT__ENABLE_VERBOSE_DEBUG OFF CACHE BOOL
+    "Enables verbose debugging, default: OFF")
+set(EVENT__DISABLE_MBEDTLS ON)
 
-link_directories(${EVENT_LIB_DIR})
+add_subdirectory(${THIRD_PARTY_PATH}/libevent)
+
+# ----- Build EvHttp -----
+include_directories(include)
+include_directories(${LIBEVENT_INCLUDE_DIRS})
+
+file(GLOB_RECURSE SRCS "${PROJECT_SOURCE_DIR}/include/*.h"
+                       "${PROJECT_SOURCE_DIR}/src/*.cc")
 
 add_executable(EvHttpExample1
-        example/example1.cpp
-        ${EVENT_LIB_FILES}
-        example/example1.cpp)
-target_link_libraries(EvHttpExample1 -levent)
+        ${PROJECT_SOURCE_DIR}/example/example1.cc ${SRCS})
+add_dependencies(EvHttpExample1 event_pthreads_static)
+target_link_libraries(EvHttpExample1 event_static)
 
 add_executable(EvHttpExample2
-        example/example2.cpp
-        ${EVENT_LIB_FILES}
-        #EvHttpClient.cpp EvHttpClient.h Utilis/Initialize.h EvHttpBase.h EvHttpBase.cpp EvHttpConn.cpp EvHttpConn.h EvHttpReq.cpp EvHttpReq.h
-        )
-target_link_libraries(EvHttpExample2 -levent)
-
-include_directories(${GTEST_INCLUDE_DIRS})
-
-add_executable(AllTest
-        test/MainTest.cpp
-        test/EvHttpServTest.cpp
-        test/EvHttpRequestTest.cpp
-        )
-
-target_link_libraries(AllTest ${GTEST_BOTH_LIBRARIES})
-target_link_libraries(AllTest ${CMAKE_THREAD_LIBS_INIT})
-add_test(Test AllTest)
-enable_testing()
+        ${PROJECT_SOURCE_DIR}/example/example2.cc ${SRCS})
+add_dependencies(EvHttpExample2 event_pthreads_static)
+target_link_libraries(EvHttpExample2 event_static)

@@ -7,16 +7,18 @@
 #ifndef __NETWORK_EVHTTP_RESP_H__
 #define __NETWORK_EVHTTP_RESP_H__
 
-#include "Utilis/Exceptions.h"
-#include "Utilis/NonCopyable.h"
-#include "event.h"
-#include "evhttp.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
 #include <list>
 #include <map>
+
+#include "event.h"
+#include "evhttp.h"
+
+#include "Utilis/Exceptions.h"
+#include "Utilis/NonCopyable.h"
 
 namespace Network {
 typedef std::list<std::string> HttpHeadVal;

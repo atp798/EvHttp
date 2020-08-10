@@ -4,15 +4,17 @@
  * MIT License
  */
 
+#include "EvHttpServ.h"
+
+#include <arpa/inet.h>
+#ifdef WIN32
+#include <WinSock2.h>
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
-
-#include "EvHttpResp.h"
-#include "EvHttpServ.h"
-
-#include "Utilis/Logger.h"
 
 #include "event.h"
 #include "event2/buffer.h"
@@ -25,11 +27,8 @@
 #include "event2/util.h"
 #include "evhttp.h"
 
-#include <arpa/inet.h>
-
-#ifdef WIN32
-#include <WinSock2.h>
-#endif
+#include "EvHttpResp.h"
+#include "Utilis/Logger.h"
 
 namespace Network {
 EvHttpServ::EvHttpServ() : EvHttpServ("", 0) {}
@@ -117,12 +116,11 @@ void EvHttpServ::SetMaxBodySize(size_t num) {
   evhttp_set_max_body_size(evHttp_, num);
 }
 
-bool EvHttpServ::RegistHandler(std::string const &strUrl, HandlerFunc func) {
+bool EvHttpServ::RegistHandler(std::string const &strUrl, handle_t *funcPtr) {
+  HandlerFunc func = funcPtr;
   if (!func) {
     return false;
   }
-
-  typedef void (*handle_t)(EvHttpResp *);
 
   //#TODO add middleware support
   auto TransFunc = [](struct evhttp_request *req, void *arg) {
@@ -132,7 +130,7 @@ bool EvHttpServ::RegistHandler(std::string const &strUrl, HandlerFunc func) {
     }
     EvHttpResp httpReq(req);
     try {
-      handle_t f = reinterpret_cast<handle_t>(arg);
+      handle_t *f = reinterpret_cast<handle_t *>(arg);
       f(&httpReq);
     } catch (EvHttpRespRTEXCP rtExcp) {
       if (nullptr != req) { /// Judge to prevent req has already been destroied
@@ -145,12 +143,15 @@ bool EvHttpServ::RegistHandler(std::string const &strUrl, HandlerFunc func) {
                        e.what());
     }
   };
-  handle_t *pph = func.target<handle_t>();
+  handle_t **pph = func.target<handle_t *>();
   if (pph != nullptr) {
     /// O SUCCESS,-1 ALREADY_EXIST,-2 FAILURE
     return (-2 != evhttp_set_cb(evHttp_, strUrl.c_str(), TransFunc,
                                 reinterpret_cast<void *>(*pph)));
   } else {
+    Utilis::LogError(
+        "Evhttp regist handle of:%s with error, function pointer get failed.\n",
+        strUrl.c_str());
     return false;
   }
 }

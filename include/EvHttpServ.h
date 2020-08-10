@@ -35,10 +35,12 @@ typedef enum eHttpMethod {
 } HttpMethod;
 typedef unsigned short HttpMethodsSet;
 
+typedef void(handle_t)(EvHttpResp *);
+
 RUNTIME_EXCEPTION(EvHttpServ);
 class EvHttpServ : Utilis::NonCopyable {
 public:
-  typedef std::function<void(EvHttpResp *)> HandlerFunc;
+  typedef std::function<handle_t> HandlerFunc;
 
 private:
   std::string servAddr_{"0.0.0.0"};
@@ -62,7 +64,7 @@ public:
   /// Default to ((((unsigned long long)0xffffffffUL) << 32) | 0xffffffffUL)
   void SetMaxBodySize(std::size_t num);
   /// Return: true if success, false if failed, check log to find failure reason
-  bool RegistHandler(std::string const &strUrl, HandlerFunc func);
+  bool RegistHandler(std::string const &strUrl, handle_t *func);
   bool UnRegistHandler(std::string const &strUrl);
   bool Start() throw(EvHttpServRTEXCP);
 };

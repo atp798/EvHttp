@@ -12,12 +12,14 @@ using namespace Network;
 
 int main()
 {
-    Utilis::Logger::GetInstance()->StartLogging();
-    Utilis::DEFER([] { Utilis::Logger::GetInstance()->StopLogging(); });
+  Utilis::Logger::GetInstance()->StartLogging();
+  Utilis::DEFER([] { Utilis::Logger::GetInstance()->StopLogging(); });
 
-    EvHttpServ Serv("0.0.0.0\0", 8077);
-    Serv.RegistHandler("/hi/testget", [](EvHttpResp *resp){resp->QuickResponse(200,"Hello World!\n");});
+  EvHttpServ Serv("0.0.0.0", 8077);
 
-    Serv.Start();
-    return 0;
+  Serv.RegistHandler("/hi/testget",  [](EvHttpResp *resp){
+      resp->QuickResponse(200,"Hello World!\n");});
+
+  Serv.Start();
+  return 0;
 }

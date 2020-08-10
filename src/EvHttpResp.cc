@@ -4,17 +4,15 @@
  * MIT License
  */
 
+#include "EvHttpResp.h"
+
+#include <fcntl.h>
+#include <unistd.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <fcntl.h>
 #include <functional>
-#include <unistd.h>
-
-#include "EvHttpServ.h"
-
-#include "Utilis/Defer.h"
-#include "Utilis/Logger.h"
 
 #include "event.h"
 #include "event2/buffer.h"
@@ -26,6 +24,9 @@
 #include "event2/listener.h"
 #include "event2/util.h"
 #include "evhttp.h"
+
+#include "Utilis/Defer.h"
+#include "Utilis/Logger.h"
 
 namespace Network {
 
