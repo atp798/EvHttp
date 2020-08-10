@@ -29,5 +29,5 @@ private:
         exitFunc_();
     }
 };
-}// namespace Utilis
+} // namespace Utilis
 #endif //__UTILIS_INITIALIZE_H_
