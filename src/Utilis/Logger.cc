@@ -20,7 +20,10 @@
 
 namespace Utilis {
 
-Logger *Logger::logger_ = new Logger;
+Logger &Logger::GetInstance() {
+  static Logger instance;
+  return instance;
+}
 
 void Logger::SetFilePrefix(std::string const &prefix) {
   if (prefix.empty()) {
@@ -32,7 +35,10 @@ void Logger::SetFilePrefix(std::string const &prefix) {
 void Logger::SetLogLevel(LogLevel level) { level_ = level; }
 
 bool Logger::StartLogging() {
-  bStop_ = false;
+  std::lock_guard<std::mutex> lock(muxThread_);
+  if (!bStop_) {
+    return false;
+  }
   time_t t;
   time(&t);
   struct tm now;
@@ -54,15 +60,20 @@ bool Logger::StartLogging() {
   }
 #endif
   spLogThread_.reset(new std::thread(std::bind(&Logger::logWriter, this)));
-  printf("Logging started!\n");
+  printf("Logging thread started!\n");
+  bStop_ = false;
   return true;
 }
 
-void Logger::StopLogging() {
+bool Logger::StopLogging() {
+  std::lock_guard<std::mutex> lock(muxThread_);
+  if (bStop_)
+    return false;
   bStop_ = true;
   cvLog_.notify_one();
   spLogThread_->join();
-  printf("Logging stopped!\n");
+  printf("Logging thread stopped!\n");
+  return true;
 }
 
 void Logger::AppendLog(LogLevel level, const char *file, const char *func,
@@ -113,7 +124,7 @@ void Logger::AppendLog(LogLevel level, const char *file, const char *func,
     msg[strlen(msg) + 1] = '\0';
   }
 
-  DEBUGPrintf("Receive log msg: %s\n", msg.c_str());
+  TRACE("Receive log msg: %s\n", msg);
   {
     std::lock_guard<std::mutex> guard(muxLog_);
     logQueue_.emplace_back(msg);
@@ -144,7 +155,7 @@ void Logger::logWriter() {
       strMsg = logQueue_.front();
       logQueue_.pop_front();
     }
-    DEBUGPrintf("Write to log: %s\n", strMsg.c_str());
+    TRACE("Write to log: %s\n", strMsg.c_str());
     fwrite((void *)(strMsg.c_str()), strMsg.length(), 1, fp_);
     fflush(fp_);
   }

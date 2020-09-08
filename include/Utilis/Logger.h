@@ -3,12 +3,11 @@
  * All rights reserved.
  * MIT License
  */
-
-#ifndef __UTILIS_LOGGER_H__
-#define __UTILIS_LOGGER_H__
+#pragma once
 
 #include <condition_variable>
 #include <list>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -19,8 +18,8 @@ namespace Utilis {
 
 const int kLogMsgLen = 4096;
 
-/// FATAL must be the last level, otherwise first line of AppendLog should be
-/// modified This is compatible with libevent log level definition
+// FATAL must be the last level, otherwise first line of AppendLog should be
+// modified. This is compatible with libevent log level definition
 typedef enum eLogLevel {
   LL_DEBUG = 0,
   LL_INFO,
@@ -31,11 +30,11 @@ typedef enum eLogLevel {
 
 const char kLogLevelStr[][6] = {"DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 
-/// use __PRETTY_FUNCTION__(gcc) or __FUNCSIG__ (vs) instead will be more
-/// powerful
+// use __PRETTY_FUNCTION__(gcc) or __FUNCSIG__ (vs) instead will be more
+// powerful
 #define LogAppend(level, ...)                                                  \
-  Logger::GetInstance()->AppendLog(Utilis::level, __FILE__, __FUNCTION__,      \
-                                   __LINE__, __VA_ARGS__)
+  Logger::GetInstance().AppendLog(Utilis::level, __FILE__, __FUNCTION__,       \
+                                  __LINE__, __VA_ARGS__)
 
 #define LogDebug(...) LogAppend(LL_DEBUG, __VA_ARGS__)
 #define LogInfo(...) LogAppend(LL_INFO, __VA_ARGS__)
@@ -44,27 +43,28 @@ const char kLogLevelStr[][6] = {"DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 #define LogFatal(...) LogAppend(LL_FATAL, __VA_ARGS__)
 
 #ifdef DEBUG
-#define DEBUGPrintf(...) printf(__VA__ARGS__)
+#define TRACE(...) printf(__VA_ARGS__)
 #else
-#define DEBUGPrintf(...)
+#define TRACE(...)
 #endif
 
-/// #TODO: Add file rotate
-/// Improve time get / msg buffer/ efficient
+// #TODO:
+// 1. Add file rotate
+// 2. Improve time get / msg buffer/ efficient
+// 3. Support flush strategy.
 class Logger : Utilis::NonCopyable {
 public:
-  static Logger *GetInstance() { return logger_; }
+  static Logger &GetInstance();
   void SetFilePrefix(std::string const &prefix);
   void SetLogLevel(LogLevel level);
 
-  ///#TODO: none-thread-safe, should only run once
+  // This will start a new thread to handle log output.
   bool StartLogging();
-  /// not thread-safe, should only run once
-  /// When call this, it will force worker to exit, which lead to log missing
-  void StopLogging();
-  /// It's better not to call this directly, call LogXXX() MACRO instead
-  /// It will auto log the file name, func name, line number, time happened and
-  /// line break
+  // When call this, it will force worker to exit, which lead to log missing
+  bool StopLogging();
+  // It's better not to call this directly, call LogXXX() MACRO instead
+  // It will auto log the file name, func name, line number, time happened and
+  // line break
   void AppendLog(LogLevel level, const char *file, const char *func, int line,
                  const char *fmt, ...);
   void SimpleAppendLog(LogLevel level, const char *fmt, ...);
@@ -73,19 +73,18 @@ private:
   void logWriter();
 
 private:
-  static Logger *logger_;
   std::string filePrefix_{"log"};
   std::string filePath_{""};
   FILE *fp_{nullptr};
   LogLevel level_{LL_DEBUG};
 
-  bool bStop_{true}; // this variable is not thread-safe
+  bool bStop_{true};
+  std::mutex muxThread_;
   std::shared_ptr<std::thread> spLogThread_;
+
   std::mutex muxLog_;
   std::condition_variable cvLog_; // flag to indicate new coming message
   std::list<std::string> logQueue_;
 };
 
 } // namespace Utilis
-
-#endif // __UTILIS_LOGGER_H__

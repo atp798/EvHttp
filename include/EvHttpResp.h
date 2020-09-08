@@ -27,6 +27,7 @@ typedef std::map<std::string, HttpHeadVal> HttpHeaders;
 RUNTIME_EXCEPTION(EvHttpResp);
 class EvHttpResp : Utilis::NonCopyable {
   /// #TODO to support large / dynamic length
+  // following MAX_POST_BODY_LEN is defined by libevent
   // const size_t               MAX_POST_BODY_LEN{1024*64};
 private:
   struct evhttp_request *evReq_{nullptr};

@@ -46,16 +46,16 @@ EvHttpServ::~EvHttpServ() {
 void evLogCB(int severity, const char *msg) throw(std::runtime_error) {
   switch (severity) {
   case EVENT_LOG_DEBUG:
-    Utilis::Logger::GetInstance()->SimpleAppendLog(Utilis::LL_DEBUG, msg);
+    Utilis::Logger::GetInstance().SimpleAppendLog(Utilis::LL_DEBUG, msg);
     break;
   case EVENT_LOG_MSG:
-    Utilis::Logger::GetInstance()->SimpleAppendLog(Utilis::LL_INFO, msg);
+    Utilis::Logger::GetInstance().SimpleAppendLog(Utilis::LL_INFO, msg);
     break;
   case EVENT_LOG_WARN:
-    Utilis::Logger::GetInstance()->SimpleAppendLog(Utilis::LL_WARN, msg);
+    Utilis::Logger::GetInstance().SimpleAppendLog(Utilis::LL_WARN, msg);
     break;
   case EVENT_LOG_ERR:
-    Utilis::Logger::GetInstance()->SimpleAppendLog(Utilis::LL_ERROR, msg);
+    Utilis::Logger::GetInstance().SimpleAppendLog(Utilis::LL_ERROR, msg);
     break;
   default:
     Utilis::LogFatal("evLog callback meet unexpected severity(log level)\n");
