@@ -13,7 +13,6 @@ Feature
 - Based on libevent.
 - No c interface exposed.
 - User friendly interface.
-- Multi-platform support.
 
 Server Example
 --------------
@@ -64,6 +63,8 @@ TODO list
 - Add tcp server & client.
 - Support https.
 - Support udp.
+- Multi-platform support (Windows first).
+- Start logging thread when needed.
 
 License
 -------

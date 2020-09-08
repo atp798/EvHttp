@@ -29,9 +29,9 @@ void testGetHandler(EvHttpResp *resp){
   std::cout<<"Get uri:"<<strPath<<std::endl;
   std::cout<<"Get uri params:"<<strQuery<<std::endl;
 
-  std::string gKey("getparam");
-  std::string hKey("pathparam");
-  std::string pKey("postparam");
+  const std::string gKey("getparam");
+  const std::string hKey("pathparam");
+  const std::string pKey("postparam");
   std::string strGVal = resp->GetPathParam(gKey);
   std::string strHVal = resp->GetHeadParam(hKey);
   std::string strPVal = resp->GetPostParam(pKey);
@@ -41,12 +41,12 @@ void testGetHandler(EvHttpResp *resp){
 
   std::string strBody = resp->GetPostMsg();
 
-  std::string rKey("retHead");
-  std::string rVal("retValue");
-  std::string rBody("Hello World!\n");
+  const std::string rKey("retHead");
+  const std::string rVal("retValue");
+  const std::string rBody("Hello World!\n");
   resp->AddRespHeadParam(rKey,rVal);
   resp->AddRespString(rBody);
-  std::string rBuf("Winter is over!\n");
+  const std::string rBuf("Winter is over!\n");
   resp->AddRespBuf(rBuf.c_str(),rBuf.length());
 
   resp->SetRespCode(200);
@@ -54,7 +54,7 @@ void testGetHandler(EvHttpResp *resp){
 }
 
 int main(){
-#ifdef WIN32
+#ifdef WIN32    // windows platform has not been tested
   WORD sockVersion = MAKEWORD(2, 2);
   WSADATA wsaData;
   if(WSAStartup(sockVersion, &wsaData) != 0){
@@ -64,8 +64,8 @@ int main(){
 	 Utilis::DEFER([]{ WSACleanup(); });
 #endif
 
-	 Utilis::Logger::GetInstance()->StartLogging();
-	 Utilis::DEFER([] { Utilis::Logger::GetInstance()->StopLogging(); });
+	 Utilis::Logger::GetInstance().StartLogging();
+	 Utilis::DEFER([] { Utilis::Logger::GetInstance().StopLogging(); });
 
   short http_port = 8077;
   std::string http_addr("0.0.0.0");
